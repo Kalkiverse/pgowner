@@ -1,0 +1,65 @@
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE profile (
+  user_id INT PRIMARY KEY,
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  phone VARCHAR(20),
+  city VARCHAR(50),
+  state VARCHAR(50),
+  address TEXT,
+  about TEXT,
+  business_name VARCHAR(100),
+  business_type VARCHAR(50),
+  gst_number VARCHAR(20),
+  pan_number VARCHAR(20),
+  business_address TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE pg_listings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  name VARCHAR(100),
+  type VARCHAR(50),
+  description TEXT,
+  city VARCHAR(100),
+  area VARCHAR(100),
+  address TEXT,
+  rent INT,
+  deposit INT,
+  discount INT,
+  amenities TEXT,
+  rooms_single INT,
+  rooms_double INT,
+  rooms_triple INT,
+  rules TEXT,
+  notice_period INT,
+  status ENUM('draft','published') DEFAULT 'draft',
+  contact_person VARCHAR(100),
+  contact_phone VARCHAR(20),
+  video_link VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE pg_media (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  pg_id INT,
+  file_path VARCHAR(255),
+  FOREIGN KEY (pg_id) REFERENCES pg_listings(id)
+);
+
+CREATE TABLE notifications (
+  user_id INT PRIMARY KEY,
+  inquiry TINYINT DEFAULT 0,
+  rental_reminder TINYINT DEFAULT 0,
+  email_alert TINYINT DEFAULT 0,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);

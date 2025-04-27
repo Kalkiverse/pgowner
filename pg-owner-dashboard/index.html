@@ -1,0 +1,646 @@
+<!-- <?php
+// Start the session (if needed)
+session_start();
+?> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PG Owner Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    /* ——— PG Finder Ad Banner Styles ——— */
+/* 1. Font */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600&display=swap');
+
+/* 2. Gradient Animation */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 3. Banner Wrapper (centers banner under navbar) */
+.banner-wrapper {
+  perspective: 1000px;
+  margin: 40px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
+
+/* 4. Main Banner */
+.ultimate-pg-banner {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90vw; 
+  max-width: 800px;
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #4B47D9, #0c0c24);
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+  box-shadow: 0 0 40px rgba(75,71,217,0.3);
+  transition: transform .2s, box-shadow .2s;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+.ultimate-pg-banner:hover {
+  cursor: pointer;
+}
+
+/* 5. 3D Tilt on Parent Hover */
+.banner-wrapper:hover .ultimate-pg-banner {
+  transform: rotateX(calc((var(--mouse-y) - 50) * 0.1deg))
+             rotateY(calc((var(--mouse-x) - 50) * 0.1deg));
+  box-shadow:
+    calc((var(--mouse-x) - 50) * 2px)
+    calc((var(--mouse-y) - 50) * 2px)
+    60px rgba(75,71,217,0.4);
+}
+
+/* 6. Left Text Reveal */
+.left-text {
+  flex: 1;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .8s, transform .8s;
+}
+.left-text.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.left-text h2 { font-size: 2rem; color: #fff; }
+.left-text p  { margin: .8rem 0; font-size:1rem; color: #dcdcff; }
+
+/* 7. Button Pulse & Ripple */
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.02); }
+}
+.left-text button {
+  position: relative; overflow: hidden;
+  padding: .6rem 1.5rem;
+  background: #fff; color: #4B47D9;
+  border: none; border-radius: 8px;
+  font-weight: bold; cursor: pointer;
+  animation: pulse 3s ease-in-out infinite;
+}
+.left-text button .ripple {
+  position: absolute; border-radius: 50%;
+  background: rgba(75,71,217,0.3);
+  transform: scale(0);
+  animation: ripple-effect .6s linear;
+  pointer-events: none;
+}
+@keyframes ripple-effect {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* 8. Right Image */
+.right-image {
+  flex: 1; display: flex; justify-content: center; align-items: center;
+}
+.right-image img {
+  width: 220px; max-width: 100%;
+  filter: drop-shadow(0 0 12px rgba(255,255,255,0.2));
+  border-radius: 8px;
+  height: 290px;
+}
+
+/* 9. Twinkling Stars */
+.star {
+  position: absolute; width: 2px; height: 2px;
+  background: #fff; border-radius: 50%;
+  opacity: .7; animation: twinkle 2s infinite ease-in-out;
+}
+@keyframes twinkle {
+  0%,100% { opacity: .7; transform: scale(1); }
+  50%     { opacity: .2; transform: scale(1.5); }
+}
+
+/* 10. Responsive */
+@media (max-width: 768px) {
+  .ultimate-pg-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  .right-image { margin-top: 1rem; }
+}
+
+    body {
+      background-color: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+    a {
+      text-decoration: none;
+      color: white;
+    }
+    /* Navbar Styles */
+    .navbar {
+      background-color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 50px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+    .navbar .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: white;
+    }
+    /* Hamburger Menu */
+    .hamburger {
+      display: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: white;
+    }
+    /* Navigation Links */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+    }
+    .nav-links a {
+      font-size: 1em;
+      transition: 0.3s;
+    }
+    .nav-links a:hover {
+      color: #4B47D9;
+    }
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .auth-buttons .register {
+      background-color: #4B47D9;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .auth-buttons .register:hover {
+      background-color: #3C3ABE;
+    }
+    .auth-buttons .login {
+      background: transparent;
+      border: 2px solid #4B47D9;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .auth-buttons .login:hover {
+      background-color: #4B47D9;
+      color: white;
+    }
+    /* Mobile Menu (hidden by default) */
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      background-color: #0f172a;
+      width: 100%;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      padding: 20px 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .mobile-menu a {
+      padding: 10px 50px;
+      font-size: 1em;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .mobile-menu .auth-buttons {
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px 50px;
+    }
+    /* Features Section */
+    .features {
+      padding: 50px 20px;
+      text-align: center;
+    }
+    .features h2 {
+      font-size: 2.2em;
+      font-weight: bold;
+      color: #4B47D9;
+      margin-bottom: 10px;
+    }
+    .features p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      color: #B3B3B3;
+    }
+    .feature-container {
+      display: grid;
+      gap: 20px;
+      padding: 0 50px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .feature-card {
+      background-color: #1e293b;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(75, 71, 217, 0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 2px solid transparent;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: #4B47D9;
+      box-shadow: 0 5px 20px rgba(75, 71, 217, 0.6);
+    }
+    .feature-card .icon {
+      font-size: 2.5em;
+      margin-bottom: 15px;
+      color: #4B47D9;
+    }
+    /* Footer Styles */
+    .footer {
+      background-color: #0f172a;
+      color: white;
+      padding: 40px 50px;
+    }
+    .footer-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .footer-section {
+      width: 22%;
+      margin-bottom: 20px;
+    }
+    .footer-section h3 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .footer-section p {
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+    .footer-section ul {
+      list-style: none;
+      padding: 0;
+    }
+    .footer-section ul li {
+      margin: 5px 0;
+    }
+    .footer-section ul li a {
+      transition: 0.3s;
+    }
+    .footer-section ul li a:hover {
+      color: #4B47D9;
+    }
+    .social-icons a {
+      font-size: 1.2em;
+      margin-right: 10px;
+      transition: 0.3s;
+    }
+    .social-icons a:hover {
+      color: #4B47D9;
+    }
+    .newsletter form {
+      display: flex;
+      margin-top: 10px;
+    }
+    .newsletter input {
+      padding: 8px;
+      border: none;
+      border-radius: 5px 0 0 5px;
+      outline: none;
+      flex: 1;
+    }
+    .newsletter button {
+      padding: 8px 15px;
+      background-color: #4B47D9;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 0 5px 5px 0;
+      transition: 0.3s;
+    }
+    .newsletter button:hover {
+      background-color: #3C3ABE;
+    }
+    .footer-bottom {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .footer-bottom p,
+    .footer-links a {
+      font-size: 0.9em;
+    }
+    .footer-links {
+      margin-top: 10px;
+    }
+    .footer-links a {
+      margin: 0 10px;
+      transition: 0.3s;
+    }
+    .footer-links a:hover {
+      color: #4B47D9;
+    }
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: block;
+      }
+      .nav-links {
+        display: none;
+      }
+      .mobile-menu.active {
+        display: flex;
+      }
+      .feature-container {
+        grid-template-columns: 1fr;
+        padding: 0 20px;
+      }
+      .footer-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .footer-section {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+        /* Add divider between footer sections */
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: 20px;
+      }
+      .footer-section:first-child {
+        border-top: none;
+        padding-top: 0;
+      }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .feature-container {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 0 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">PG Owner</div>
+    <div class="hamburger" id="hamburger">
+      <i class="fas fa-bars"></i>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="#">Home</a>
+      <a href="#">Features</a>
+      <a href="#">Search</a>
+      <!-- <a href="#">Listings</a> -->
+      <a href="#">Testimonials</a>
+      <a href="#">Support</a>
+      <div class="auth-buttons">
+        <a href="register.html" class="register">Register</a>
+        <a href="login.html" class="login">Login</a>
+      </div>      
+    </div>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="#">Home</a>
+      <a href="#">Features</a>
+      <a href="#">Search</a>
+      <!-- <a href="#">Listings</a> -->
+      <a href="#">Testimonials</a>
+      <a href="#">Support</a>
+      <div class="auth-buttons">
+        <a href="register.html" class="register">Register</a>
+        <a href="login.html" class="login">Login</a>
+      </div>
+    </div>
+  </nav>
+
+<!-- Banner code goes here -->
+<div class="banner-wrapper">
+  <a href="../pg-finder-main/index.php" target="_blank" class="ultimate-pg-banner">
+    <div class="left-text">
+      <h2>🏠 Find Your Perfect PG Today!</h2>
+      <p>Explore verified PGs near you with ease. Trusted by thousands of students and professionals.</p>
+      <button id="ctaBtn">Explore Now</button>
+    </div>
+    <div class="right-image">
+      <img src="img/banar.png" alt="PG Finder Illustration"/>
+    </div>
+  </a>
+</div>
+
+  <!-- Features Section -->
+  <section class="features">
+    <h2>Everything You Need</h2>
+    <p>Comprehensive features for PG owners to manage their properties effectively</p>
+    <div class="feature-container">
+      <div class="feature-card">
+        <i class="icon fa-solid fa-house"></i>
+        <h3>Easy PG Management</h3>
+        <p>Quickly add, edit, or remove PG listings with an intuitive dashboard.</p>
+      </div>
+      <div class="feature-card">
+        <i class="icon fa-solid fa-chart-line"></i>
+        <h3>Analytics Dashboard</h3>
+        <p>Track the number of tenants viewing your PGs and their interactions.</p>
+      </div>
+      <div class="feature-card">
+        <i class="icon fa-solid fa-map-marked-alt"></i>
+        <h3>Location Mapping</h3>
+        <p>Integrate maps to show your PG’s exact location to potential tenants.</p>
+      </div>
+      <div class="feature-card">
+        <i class="icon fa-solid fa-check-circle"></i>
+        <h3>Verified Listings</h3>
+        <p>All PGs go through a verification process to ensure trust and reliability.</p>
+      </div>
+      <div class="feature-card">
+        <i class="icon fa-solid fa-comments"></i>
+        <h3>Direct Inquiries</h3>
+        <p>Receive direct inquiries from tenants interested in your PGs.</p>
+      </div>
+      <div class="feature-card">
+        <i class="icon fa-solid fa-bell"></i>
+        <h3>Real-time Notifications</h3>
+        <p>Stay updated with instant alerts on new tenant activity and messages.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section">
+        <h3>PG Owner</h3>
+        <p>Manage and list your PGs effortlessly with our intuitive dashboard.</p>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="#">Dashboard</a></li>
+          <li><a href="#">Add PG</a></li>
+          <li><a href="#">Manage Listings</a></li>
+          <li><a href="pg-finder.html">PG Finder Website</a></li>
+          <li><a href="admin-login.html">Admin Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Contact Us</h3>
+        <p>📞 +91 123 456 7890</p>
+        <p>📧 support@pgowner.com</p>
+      </div>
+      <div class="footer-section newsletter">
+        <h3>Newsletter</h3>
+        <p>Subscribe to get updates on new PGs and offers.</p>
+        <form>
+          <input type="email" placeholder="Enter your email" required>
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 PG Owner. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Toggle mobile menu when hamburger icon is clicked
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('active');
+    });
+    
+    // Close mobile menu when clicking outside of it
+    document.addEventListener('click', (event) => {
+      const isClickInsideMenu = mobileMenu.contains(event.target);
+      const isClickOnHamburger = hamburger.contains(event.target);
+      if (!isClickInsideMenu && !isClickOnHamburger && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
+      }
+    });
+  </script>
+  <script>
+    // Ensure buttons redirect to the correct pages
+    document.addEventListener("DOMContentLoaded", function () {
+      const registerBtn = document.querySelector(".register");
+      const loginBtn = document.querySelector(".login");
+  
+      if (registerBtn) {
+        registerBtn.addEventListener("click", () => {
+          window.location.href = "register.html";
+        });
+      }
+  
+      if (loginBtn) {
+        loginBtn.addEventListener("click", () => {
+          window.location.href = "login.html";
+        });
+      }
+    });
+  </script>
+  <!-- banner script  -->
+  <script>
+    // 3D Tilt
+    const banner = document.querySelector('.banner-wrapper');
+    const card   = document.querySelector('.ultimate-pg-banner');
+    banner.addEventListener('mousemove', e => {
+      const r = banner.getBoundingClientRect();
+      card.style.setProperty('--mouse-x', ((e.clientX-r.left)/r.width)*100);
+      card.style.setProperty('--mouse-y', ((e.clientY-r.top)/r.height)*100);
+    });
+  
+    // Text reveal
+    const left = document.querySelector('.left-text');
+    window.addEventListener('load', () => setTimeout(()=>left.classList.add('visible'),200));
+  
+    // Button ripple
+    document.getElementById('ctaBtn').addEventListener('click', e => {
+      const btn = e.currentTarget, r = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const size = Math.max(r.width,r.height);
+      ripple.style.width = ripple.style.height = size+'px';
+      ripple.style.left  = (e.clientX-r.left-size/2)+'px';
+      ripple.style.top   = (e.clientY-r.top -size/2)+'px';
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', ()=> ripple.remove());
+    });
+  
+    // Twinkling stars
+    (function addStars(n=60){
+      const banner = document.querySelector('.ultimate-pg-banner');
+      for(let i=0;i<n;i++){
+        const s=document.createElement('div');
+        s.className='star';
+        s.style.top  =Math.random()*100+'%';
+        s.style.left =Math.random()*100+'%';
+        s.style.animationDelay=Math.random()*3+'s';
+        banner.appendChild(s);
+      }
+    })();
+  
+    // Auto-confetti burst
+    setInterval(()=>{
+      const colors=['#fff','#4B47D9','#a0a0ff'];
+      for(let i=0;i<20;i++){
+        const d=document.createElement('div');
+        Object.assign(d.style,{
+          position:'absolute',
+          width:'6px',height:'6px',
+          background:colors[Math.floor(Math.random()*colors.length)],
+          borderRadius:'50%',
+          left:Math.random()*100+'%',
+          top:Math.random()*100+'%',
+          opacity:1,
+          transition:'transform 1s ease-out,opacity 1s ease-out'
+        });
+        document.body.appendChild(d);
+        setTimeout(()=>{ 
+          d.style.transform=`translate(${(Math.random()-0.5)*200}px, ${(Math.random()-0.5)*200}px)`;
+          d.style.opacity=0;
+        },50);
+        setTimeout(()=>d.remove(),1050);
+      }
+    },3000);
+  </script>
+  
+</body>
+</html>

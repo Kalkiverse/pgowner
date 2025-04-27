@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PG Verification Dashboard</title>
+  <!-- Font Awesome CDN for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    :root {
+      --bg: #1b1f2a;
+      --card: #23283f;
+      --text: #e0e0e0;
+      --muted: #888;
+      --primary: #4B47D9;
+      --success: #27ae60;
+      --warning: #f1c40f;
+      --danger: #e74c3c;
+      --hover: rgba(255,255,255,0.05);
+      --sidebar-width: 240px;
+    }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    body {
+      font-family: sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    /* Sidebar Styling */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--card);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: transform 0.3s ease;
+    }
+    .sidebar h2 {
+      color: var(--primary);
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .sidebar nav ul {
+      list-style: none;
+    }
+    .sidebar nav ul li {
+      margin-bottom: 15px;
+    }
+    .sidebar nav ul li a {
+      text-decoration: none;
+      color: var(--text);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+    .sidebar nav ul li a:hover {
+      background: var(--hover);
+    }
+    /* Main Content Styling */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    /* Hamburger Button - visible only on mobile */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+    /* Dashboard Cards */
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--card);
+      padding: 20px;
+      flex: 1;
+      min-width: 200px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .card h3 {
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+    .card p {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    /* Table Container */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 6px;
+      background: var(--bg);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 800px;
+    }
+    thead {
+      background: rgba(255,255,255,0.05);
+    }
+    th,
+    td {
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      vertical-align: middle;
+    }
+    th {
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    /* PG Listing Specific Styling */
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .pg-name {
+      display: flex;
+      align-items: center;
+    }
+    .pg-id {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-left: 40px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      text-transform: capitalize;
+      color: white;
+    }
+    .badge.verified { background: var(--success); }
+    .badge.pending { background: var(--warning); color: black; }
+    /* Action Buttons in the Table */
+    .actions {
+      /*display: flex;*/
+      align-items: center;
+      gap: 8px;
+      vertical-align: middle;
+    }
+    .actions button {
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      line-height: 1;
+    }
+    .actions button:hover {
+      background: var(--hover);
+    }
+    .actions i {
+      font-size: 16px;
+      line-height: 1;
+      vertical-align: middle;
+    }
+    /* Responsive Styles for Mobile */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 1000;
+        transform: translateX(-100%);
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation (visible by default on desktop) -->
+  <aside class="sidebar" id="sidebar">
+    <h2>PG Verify</h2>
+    <nav>
+      <ul>
+        <li><a href="#"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+        <!--
+        <li><a href="#"><i class="fas fa-check-circle"></i>Pending Verifications</a></li>
+        <li><a href="#"><i class="fas fa-thumbs-up"></i>Verified PGs</a></li>
+        <li><a href="#"><i class="fas fa-home"></i>All Listings</a></li>
+        <li><a href="#"><i class="fas fa-cogs"></i>Settings</a></li>
+        -->
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Header -->
+    <div class="header">
+      <!-- Hamburger Button for Mobile -->
+      <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+      <h1>PG Verification Dashboard</h1>
+      <div class="profile">
+        <!--<img src="https://via.placeholder.com/40" alt="Admin Profile">-->
+        <!--<span>Admin Name</span>-->
+      </div>
+    </div>
+    
+    <!-- Dashboard Cards -->
+    <div class="cards">
+      <div class="card">
+        <h3>Total PG Listings</h3>
+        <p>150</p>
+      </div>
+      <div class="card">
+        <h3>Pending Verification</h3>
+        <p>35</p>
+      </div>
+      <div class="card">
+        <h3>Verified PGs</h3>
+        <p>115</p>
+      </div>
+    </div>
+
+    <!-- PG Listings Table -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>PG Name</th>
+            <th>Location</th>
+            <th>Type</th>
+            <th>Rooms</th>
+            <th>Price (₹)</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1 -->
+          <tr>
+            <td>
+              <div class="pg-name">
+                <div class="avatar">L</div>
+                Lotus PG
+              </div>
+              <span class="pg-id">ID: PG‑1001</span>
+            </td>
+            <td>Koramangala, Bangalore</td>
+            <td>Men's PG</td>
+            <td>12</td>
+            <td>8,500</td>
+            <td>
+              <span class="badge pending">Pending</span>
+            </td>
+            <td class="actions">
+              <button title="Verify"><i class="fas fa-check"></i></button>
+              <button title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+          <!-- Row 2 -->
+          <tr>
+            <td>
+              <div class="pg-name">
+                <div class="avatar" style="background:#6c5ce7;">S</div>
+                Sunrise Residency
+              </div>
+              <span class="pg-id">ID: PG‑1002</span>
+            </td>
+            <td>HSR Layout, Bangalore</td>
+            <td>Women's PG</td>
+            <td>18</td>
+            <td>9,200</td>
+            <td>
+              <span class="badge pending">Pending</span>
+            </td>
+            <td class="actions">
+              <button title="Verify"><i class="fas fa-check"></i></button>
+              <button title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+          <!-- Row 3 -->
+          <tr>
+            <td>
+              <div class="pg-name">
+                <div class="avatar" style="background:#00b894;">G</div>
+                Green Valley PG
+              </div>
+              <span class="pg-id">ID: PG‑1003</span>
+            </td>
+            <td>Whitefield, Bangalore</td>
+            <td>Family PG</td>
+            <td>8</td>
+            <td>12,500</td>
+            <td>
+              <span class="badge verified">Verified</span>
+            </td>
+            <td class="actions">
+              <button title="View Details"><i class="fas fa-eye"></i></button>
+              <button title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JavaScript to Toggle Sidebar on Mobile -->
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    // Optional: Hide sidebar when clicking outside on mobile devices
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // ————————————————
+    // Sidebar toggle (mobile)
+    // ————————————————
+    const hamburger = document.getElementById('hamburger');
+    const sidebar   = document.getElementById('sidebar');
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768
+        && !sidebar.contains(e.target)
+        && !hamburger.contains(e.target)
+      ) {
+        sidebar.classList.remove('active');
+      }
+    });
+  
+    // ————————————————
+    // Cache DOM elements
+    // ————————————————
+    const tbody = document.querySelector('table tbody');
+    const cards = document.querySelectorAll('.card p');
+  
+    // ————————————————
+    // Load & render all PG listings
+    // ————————————————
+    async function loadPGListings() {
+      try {
+        const res  = await fetch('backend/admin/get_admin_pg_listings.php');
+        const data = await res.json();
+  
+        // Update cards
+        const total    = data.length;
+        const verified = data.filter(p => p.status === 'Verified').length;
+        const pending  = total - verified;
+        cards[0].textContent = total;
+        cards[1].textContent = pending;
+        cards[2].textContent = verified;
+  
+        // Render table rows
+        tbody.innerHTML = '';
+        for (const pg of data) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <div class="pg-name">
+                <div class="avatar">${pg.name.charAt(0).toUpperCase()}</div>
+                ${pg.name}
+              </div>
+              <span class="pg-id">ID: PG‑${pg.id}</span>
+            </td>
+            <td>${pg.area}, ${pg.city}</td>
+            <td>${pg.type}</td>
+            <td>${pg.rooms}</td>
+            <td>₹${Number(pg.rent).toLocaleString('en-IN')}</td>
+            <td>
+              <span class="badge ${pg.status.toLowerCase()}">${pg.status}</span>
+            </td>
+            <td class="actions">
+              ${pg.status !== 'Verified'
+                ? `<button class="verify-btn" data-id="${pg.id}" title="Verify">
+                     <i class="fas fa-check"></i>
+                   </button>`
+                : `<button title="View"><i class="fas fa-eye"></i></button>`
+              }
+              <button class="delete-btn" data-id="${pg.id}" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+  
+        attachRowHandlers();
+      } catch (err) {
+        console.error('Error loading listings:', err);
+        alert('Failed to load listings. See console for details.');
+      }
+    }
+  
+    // ————————————————
+    // Attach handlers to each row’s buttons
+    // ————————————————
+    function attachRowHandlers() {
+      // Verify
+      document.querySelectorAll('.verify-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          if (!confirm('Verify this listing?')) return;
+          try {
+            const res = await fetch(`backend/admin/update_pg_status.php?id=${id}`);
+            const txt = (await res.text()).trim();
+            if (txt === 'success') {
+              alert('✅ Verified!');
+              loadPGListings();
+            } else {
+              alert('❌ Verify failed:\n' + txt);
+              console.error('Verify failed:\n' + txt);
+            }
+          } catch (err) {
+            console.error('Verify error:', err);
+            alert('Verify request failed.');
+          }
+        });
+      });
+  
+      // Delete
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          if (!confirm('Delete this listing?')) return;
+          try {
+            const res = await fetch(`backend/admin/delete_pg_by_admin.php?id=${id}`);
+            const txt = (await res.text()).trim();
+            if (txt === 'success') {
+              alert('🗑️ Deleted.');
+              loadPGListings();
+            } else {
+              alert('❌ Delete failed:\n' + txt);
+              console.error('Delete failed:\n' + txt);
+            }
+          } catch (err) {
+            console.error('Delete error:', err);
+            alert('Delete request failed.');
+          }
+        });
+      });
+    }
+  
+    // ————————————————
+    // Initial fetch
+    // ————————————————
+    loadPGListings();
+  });
+  </script>
+  
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PG Listings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root {
+            --bg: #1b1f2a;
+            --card: #23283f;
+            --text: #e0e0e0;
+            --muted: #888;
+            --primary: #4B47D9;
+            --success: #27ae60;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --hover: rgba(255,255,255,0.05);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: sans-serif;
+            line-height: 1.4;
+        }
+
+        /* Outer Box */
+        .box {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        /* Filter Row */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filters select,
+        .filters input {
+            background: var(--bg);
+            border: none;
+            color: var(--text);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .filters input { flex: 1; }
+
+        /* Table Container */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 6px;
+            background: var(--bg);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        thead { background: rgba(255,255,255,0.05); }
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            vertical-align: middle; /* Ensure vertical centering of cell content */
+        }
+        th { font-weight: 500; text-transform: uppercase; font-size: 0.75rem; color: var(--muted); }
+
+        /* Avatar cell */
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .pg-name { display: flex; align-items: center; }
+        .pg-id {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-left: 40px; /* align under name */
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            text-transform: capitalize;
+            color: white;
+        }
+        .badge.active { background: var(--success); }
+        .badge.inactive { background: var(--danger); }
+        .badge.pending { background: var(--warning); color: black; }
+
+        /* Action buttons */
+        .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center; /* Vertically center the buttons */
+        }
+        .actions button {
+            background: var(--card); /* Better contrast */
+            border: none;
+            padding: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 1rem;
+            transition: background 0.2s;
+            line-height: 1; /* Ensure consistent line height for icons */
+        }
+        .actions button i {
+            vertical-align: middle; /* Vertically align icons within buttons */
+        }
+        .actions button:hover { background: var(--hover); }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .pagination li { display: inline; }
+        .pagination button {
+            background: var(--bg);
+            border: none;
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .pagination .active {
+            background: var(--primary);
+            color: white;
+        }
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+        @media (max-width: 600px) {
+            .filters { flex-direction: column; }
+            .filters input { order: -1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="filters">
+            <select>
+                <option>All Status</option>
+                <option>Verified</option>
+                <option>Unverified</option>
+            </select>
+            <select>
+                <option>All Cities</option>
+                <option>Bangalore</option>
+                <option>Delhi</option>
+                <option>Mumbai</option>
+            </select>
+            <select>
+                <option>All Types</option>
+                <option>Men's PG</option>
+                <option>Women's PG</option>
+                <option>Family PG</option>
+                <option>Co‑Living</option>
+            </select>
+            <input type="text" placeholder="Search properties…" />
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>PG Name</th>
+                        <th>Location</th>
+                        <th>Type</th>
+                        <th>Rooms</th>
+                        <th>Price (₹)</th>
+                        <th>Status</th>
+                        <!-- <th>Views</th> -->
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="pg-name">
+                                <div class="avatar">L</div>
+                                Lotus PG
+                            </div>
+                            <span class="pg-id">ID: PG‑1001</span>
+                        </td>
+                        <td>Koramangala, Bangalore</td>
+                        <td>Men's PG</td>
+                        <td>12</td>
+                        <td>8,500</td>
+                        <td><span class="badge active">Verified</span></td>
+                        <!-- <td>1,248</td> -->
+                        <td class="actions">
+                            <button title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <!-- <button title="View"> -->
+                                <!-- <i class="fas fa-eye"></i> -->
+                            <!-- </button> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="pg-name">
+                                <div class="avatar" style="background:#6c5ce7;">S</div>
+                                Sunrise Residency
+                            </div>
+                            <span class="pg-id">ID: PG‑1002</span>
+                        </td>
+                        <td>HSR Layout, Bangalore</td>
+                        <td>Women's PG</td>
+                        <td>18</td>
+                        <td>9,200</td>
+                        <td><span class="badge active">Verified</span></td>
+                        <!-- <td>986</td> -->
+                        <td class="actions">
+                            <button title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <!-- <button title="View"> -->
+                                <!-- <i class="fas fa-eye"></i> -->
+                            <!-- </button> -->
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="pg-name">
+                                <div class="avatar" style="background:#00b894;">G</div>
+                                Green Valley PG
+                            </div>
+                            <span class="pg-id">ID: PG‑1003</span>
+                        </td>
+                        <td>Whitefield, Bangalore</td>
+                        <td>Family PG</td>
+                        <td>8</td>
+                        <td>12,500</td>
+                        <td><span class="badge inactive">Unverified</span></td>
+                        <!-- <td>532</td> -->
+                        <td class="actions">
+                            <button title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <!-- <button title="View"> -->
+                                <!-- <i class="fas fa-eye"></i> -->
+                            <!-- </button> -->
+                        </td>
+                    </tr>
+                    </tbody>
+            </table>
+        </div>
+
+        <ul class="pagination">
+            <li><button disabled>Previous</button></li>
+            <li><button class="active">1</button></li>
+            <li><button>2</button></li>
+            <li><button>Next</button></li>
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          // Function to load listings from the backend
+          async function loadListings() {
+            try {
+              const response = await fetch("backend/pg/get_listings.php");
+              // Expecting a JSON array of listings
+              const listings = await response.json();
+              
+              const tbody = document.querySelector("table tbody");
+              tbody.innerHTML = ""; // Clear existing rows
+              
+              listings.forEach(listing => {
+                const row = document.createElement("tr");
+                // Compose a row. Adjust the fields as needed.
+                // We assume the following fields: 
+                // id, name, city, area, type, rooms (combined rooms count), rent, status
+                row.innerHTML = `
+                  <td>
+                    <div class="pg-name">
+                      <div class="avatar">${listing.name.charAt(0).toUpperCase()}</div>
+                      ${listing.name}
+                    </div>
+                    <span class="pg-id">ID: PG‑${listing.id}</span>
+                  </td>
+                  <td>${listing.location}</td>
+                  <td>${listing.type}</td>
+                  <td>${listing.rooms}</td>
+                  <td>${listing.rent.toLocaleString("en-IN")}</td>
+                  <td>
+                    <span class="badge ${listing.status.toLowerCase()}">
+                      ${listing.status}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    <button class="edit-btn" data-id="${listing.id}" title="Edit">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete-btn" data-id="${listing.id}" title="Delete">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                `;
+                tbody.appendChild(row);
+              });
+              
+              // Attach event listeners for delete buttons
+              document.querySelectorAll(".delete-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                  const id = this.getAttribute("data-id");
+                  if (confirm("Are you sure you want to delete this listing?")) {
+                    deleteListing(id);
+                  }
+                });
+              });
+              
+              // Attach event listeners for edit buttons
+              document.querySelectorAll(".edit-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                  const id = this.getAttribute("data-id");
+                  // Redirect to an edit page or open an edit modal:
+                  window.location.href = "edit_pg.html?id=" + id;
+                });
+              });
+            } catch (error) {
+              console.error("Error fetching listings:", error);
+            }
+          }
+          
+          // Function to delete a listing by its ID
+          async function deleteListing(id) {
+            try {
+              const response = await fetch("backend/pg/delete_pg.php?id=" + id, {
+                method: "DELETE"
+              });
+              const result = await response.text();
+              if (result.includes("success")) {
+                alert("Listing deleted successfully.");
+                loadListings(); // Reload listings
+              } else {
+                alert("Error deleting listing: " + result);
+              }
+            } catch (error) {
+              console.error("Error deleting listing:", error);
+              alert("Error deleting listing: " + error.message);
+            }
+          }
+          
+          // Initial load of listings
+          loadListings();
+        });
+        </script>
+        
+</body>
+</html>
